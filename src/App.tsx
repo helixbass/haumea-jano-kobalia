@@ -1,13 +1,23 @@
 import React, {FC} from 'react'
-import {flowMax, addDisplayName, addProps} from 'ad-hok'
+import {flowMax, addDisplayName, addProps, addWrapper} from 'ad-hok'
+import {addLayoutEffectOnMount} from 'ad-hok-utils'
+import gsap from 'gsap'
 
 import {makeStyles} from 'utils/style'
 import colors from 'utils/colors'
+import getContextHelpers from 'utils/getContextHelpers'
+import {RefsProps, addRefs} from 'utils/refs'
+import {toObjectKeys} from 'utils/fp'
+import addRenderingDelay from 'utils/addRenderingDelay'
 
 const HEIGHT = 800
 const WIDTH = 800
 
 const INNER_CIRCLE_CLIP_PATH_ID = 'inner-circle-clip-path'
+
+const [addRefsContextProvider, addRefsContext] = getContextHelpers<RefsProps>(
+  toObjectKeys(['refs', 'setRef']),
+)
 
 const GreenBackground: FC = flowMax(addDisplayName('GreenBackground'), () => (
   <path
@@ -54,47 +64,102 @@ const Flower: FC = flowMax(addDisplayName('Flower'), () => (
   </g>
 ))
 
-const OuterBorder: FC = flowMax(addDisplayName('OuterBorder'), () => (
-  <path
-    css={styles.border}
-    transform={`translate(${(WIDTH - 529.5) / 2}, ${(HEIGHT - 603.67) / 2})`}
-    d="M529.5,301.8c0.6,36.9-1.4,73.6-11.2,109.4c-27.8,101.4-92.9,164.5-196,186 c-60.1,12.6-119.5,7-175.6-19.5c-68.7-32.4-112.1-86.5-133.2-159c-8.7-29.7-12.5-60.3-13-91.2c-0.5-27.8-1-55.6,1.9-83.4 c7-68.5,30.6-129.3,82.1-177c36.2-33.5,79.1-53.8,127.4-62.2c53.2-9.2,105.7-6.1,156.1,14.1c76.4,30.6,125,86.6,148.2,165.1 c10.3,34.9,13.5,70.8,13.3,107.1C529.5,294.8,529.5,298.3,529.5,301.8z"
-  />
+const Girl: FC = flowMax(addDisplayName('Girl'), () => (
+  <g>
+    <Hair />
+    <Face />
+    <Eyebrow />
+    <CheekDot />
+    <Flower />
+  </g>
 ))
+
+const Content: FC = flowMax(
+  addDisplayName('Content'),
+  addRefsContext,
+  ({setRef}) => (
+    <g
+      ref={setRef('content')}
+      transform={`translate(${(WIDTH - 560) / 2}, ${(HEIGHT - 552.56) / 2})`}
+      clipPath={`url(#${INNER_CIRCLE_CLIP_PATH_ID})`}
+    >
+      <GreenBackground />
+      <Girl />
+    </g>
+  ),
+)
+
+const OuterBorder: FC = flowMax(
+  addDisplayName('OuterBorder'),
+  addRefsContext,
+  ({setRef}) => (
+    <path
+      ref={setRef('outerBorder')}
+      css={styles.border}
+      transform={`translate(${(WIDTH - 529.5) / 2}, ${(HEIGHT - 603.67) / 2})`}
+      d="M529.5,301.8c0.6,36.9-1.4,73.6-11.2,109.4c-27.8,101.4-92.9,164.5-196,186 c-60.1,12.6-119.5,7-175.6-19.5c-68.7-32.4-112.1-86.5-133.2-159c-8.7-29.7-12.5-60.3-13-91.2c-0.5-27.8-1-55.6,1.9-83.4 c7-68.5,30.6-129.3,82.1-177c36.2-33.5,79.1-53.8,127.4-62.2c53.2-9.2,105.7-6.1,156.1,14.1c76.4,30.6,125,86.6,148.2,165.1 c10.3,34.9,13.5,70.8,13.3,107.1C529.5,294.8,529.5,298.3,529.5,301.8z"
+      data-svg-origin={`${WIDTH / 2} ${HEIGHT / 2}`}
+    />
+  ),
+)
 
 const App: FC = flowMax(
   addDisplayName('App'),
+  addRefs,
+  addRefsContextProvider,
   addProps({
     scale: 1,
   }),
+  addWrapper((render) => <div css={styles.container}>{render()}</div>),
+  addRenderingDelay(2000),
+  addLayoutEffectOnMount(({refs}) => () => {
+    const {content, outerBorder} = refs
+    gsap.set(content, {
+      display: 'none',
+    })
+    gsap.set(outerBorder, {
+      scaleX: 0.1,
+      scaleY: 1.6,
+    })
+    gsap
+      .timeline()
+      .from(outerBorder, {
+        duration: 2.5,
+        opacity: 0,
+      })
+      .to(
+        outerBorder,
+        {
+          duration: 1,
+          scaleX: 1,
+          ease: 'power2.in',
+        },
+        '<0.2',
+      )
+      .to(
+        outerBorder,
+        {
+          duration: 0.2,
+          scaleY: 1,
+          ease: 'power2.in',
+        },
+        '>-0.2',
+      )
+  }),
   ({scale}) => (
-    <div css={styles.container}>
-      <svg
-        height={HEIGHT * scale}
-        width={WIDTH * scale}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-      >
-        <defs>
-          <clipPath id={INNER_CIRCLE_CLIP_PATH_ID}>
-            <path d="M519.7,277.2c0.2,36.2-1.9,72.2-11.9,107.3c-19.4,68.6-60.5,119-126.3,147.7 c-50.6,22.1-103.6,25.4-157.2,14.2C160,532.9,109.9,498.2,76.4,441C57.8,409.2,48.2,374.8,44,339c-0.1-0.8-0.2-1.5-0.2-2.2 c0,0,0,0,0,0c0-0.5,0-0.9,0-1.3c-0.8-7.1-1.3-14.3-1.8-21.4c0-0.2,0-0.3,0-0.5c0-0.1,0-0.2,0-0.2c-0.6-12.3-1-24.7-1-37 c0-12.3,0.4-24.6,1-37c0-0.2,0-0.5,0-0.7c2.3-44.8,11.5-87.8,34.4-127c33.5-57.2,83.6-91.9,148-105.4C277.9-5,330.9-1.6,381.5,20.5 c65.8,28.7,106.9,79.1,126.3,147.7c9.9,35.1,12.1,71,11.9,107.3V277.2z" />
-          </clipPath>
-        </defs>
-        <OuterBorder />
-        <g
-          transform={`translate(${(WIDTH - 560) / 2}, ${
-            (HEIGHT - 552.56) / 2
-          })`}
-          clipPath={`url(#${INNER_CIRCLE_CLIP_PATH_ID})`}
-        >
-          <GreenBackground />
-          <Hair />
-          <Face />
-          <Eyebrow />
-          <CheekDot />
-          <Flower />
-        </g>
-      </svg>
-    </div>
+    <svg
+      height={HEIGHT * scale}
+      width={WIDTH * scale}
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+    >
+      <defs>
+        <clipPath id={INNER_CIRCLE_CLIP_PATH_ID}>
+          <path d="M519.7,277.2c0.2,36.2-1.9,72.2-11.9,107.3c-19.4,68.6-60.5,119-126.3,147.7 c-50.6,22.1-103.6,25.4-157.2,14.2C160,532.9,109.9,498.2,76.4,441C57.8,409.2,48.2,374.8,44,339c-0.1-0.8-0.2-1.5-0.2-2.2 c0,0,0,0,0,0c0-0.5,0-0.9,0-1.3c-0.8-7.1-1.3-14.3-1.8-21.4c0-0.2,0-0.3,0-0.5c0-0.1,0-0.2,0-0.2c-0.6-12.3-1-24.7-1-37 c0-12.3,0.4-24.6,1-37c0-0.2,0-0.5,0-0.7c2.3-44.8,11.5-87.8,34.4-127c33.5-57.2,83.6-91.9,148-105.4C277.9-5,330.9-1.6,381.5,20.5 c65.8,28.7,106.9,79.1,126.3,147.7c9.9,35.1,12.1,71,11.9,107.3V277.2z" />
+        </clipPath>
+      </defs>
+      <OuterBorder />
+      <Content />
+    </svg>
   ),
 )
 

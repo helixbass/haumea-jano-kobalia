@@ -82,11 +82,26 @@ const Flower: FC = flowMax(
   addRefsContext,
   ({setRef}) => (
     <g ref={setRef('flower')} css={styles.flower}>
-      <path d="M291,121.1c8.4,0.4,16.6,4.2,23,11.7c1.8,2.1,1.8,3.9,0.6,6.3c-10.2,19.7-38.1,22.6-52.2,5.6 c-2-2.4-2.2-4.4-0.7-7.1C267.3,127.5,278.1,121,291,121.1z" />
-      <path d="M212.2,139.3c-17.6-0.1-31.2-13-32.3-29.4c-0.2-3,0.9-4.5,3.4-5.8c19.9-9.8,44.2,4.4,45.4,26.5 c0.2,2.9-0.7,4.6-3.4,5.8C220.8,138.3,216.2,139.5,212.2,139.3z" />
-      <path d="M187.7,183.7c0.2-20.7,19.7-35.6,39.3-30.6c2.8,0.7,4.1,2.2,4.6,5c3.8,21.7-19.1,41.6-40.1,34.7 C186.2,191.2,188.4,186.6,187.7,183.7z" />
-      <path d="M235.5,101.3c0-13.1,7.8-24.4,19.6-29.3c3-1.2,4.8-0.7,6.9,1.6c15.3,16,9.1,43.4-11.6,51.2 c-2.5,1-4.3,0.6-6.1-1.4C238.5,117.1,235.4,109.9,235.5,101.3z" />
-      <path d="M242.7,178.4c-0.2-5.6,1.7-10.7,4.1-15.7c1.8-3.8,4.5-4.3,8.1-3.4c21,4.8,31.1,28.8,20.1,47.2 c-1.8,3.1-3.8,3.9-7.3,3.1C252.7,206.1,242.6,193.6,242.7,178.4z" />
+      <path
+        ref={setRef('flowerPetal1')}
+        d="M291,121.1c8.4,0.4,16.6,4.2,23,11.7c1.8,2.1,1.8,3.9,0.6,6.3c-10.2,19.7-38.1,22.6-52.2,5.6 c-2-2.4-2.2-4.4-0.7-7.1C267.3,127.5,278.1,121,291,121.1z"
+      />
+      <path
+        ref={setRef('flowerPetal2')}
+        d="M212.2,139.3c-17.6-0.1-31.2-13-32.3-29.4c-0.2-3,0.9-4.5,3.4-5.8c19.9-9.8,44.2,4.4,45.4,26.5 c0.2,2.9-0.7,4.6-3.4,5.8C220.8,138.3,216.2,139.5,212.2,139.3z"
+      />
+      <path
+        ref={setRef('flowerPetal3')}
+        d="M187.7,183.7c0.2-20.7,19.7-35.6,39.3-30.6c2.8,0.7,4.1,2.2,4.6,5c3.8,21.7-19.1,41.6-40.1,34.7 C186.2,191.2,188.4,186.6,187.7,183.7z"
+      />
+      <path
+        ref={setRef('flowerPetal4')}
+        d="M235.5,101.3c0-13.1,7.8-24.4,19.6-29.3c3-1.2,4.8-0.7,6.9,1.6c15.3,16,9.1,43.4-11.6,51.2 c-2.5,1-4.3,0.6-6.1-1.4C238.5,117.1,235.4,109.9,235.5,101.3z"
+      />
+      <path
+        ref={setRef('flowerPetal5')}
+        d="M242.7,178.4c-0.2-5.6,1.7-10.7,4.1-15.7c1.8-3.8,4.5-4.3,8.1-3.4c21,4.8,31.1,28.8,20.1,47.2 c-1.8,3.1-3.8,3.9-7.3,3.1C252.7,206.1,242.6,193.6,242.7,178.4z"
+      />
     </g>
   ),
 )
@@ -162,10 +177,29 @@ const App: FC = flowMax(
       face,
       eyebrow,
       cheekDot,
-      flower,
+      flowerPetal1,
+      flowerPetal2,
+      flowerPetal3,
+      flowerPetal4,
+      flowerPetal5,
     } = refs
+    const flowerPetals = [
+      flowerPetal1,
+      flowerPetal5,
+      flowerPetal3,
+      flowerPetal2,
+      flowerPetal4,
+    ]
     gsap.set(
-      [outerBorder, greenBackground, girl, face, eyebrow, cheekDot, flower],
+      [
+        outerBorder,
+        greenBackground,
+        girl,
+        face,
+        eyebrow,
+        cheekDot,
+        ...flowerPetals,
+      ],
       {
         opacity: 0,
       },
@@ -233,6 +267,45 @@ const App: FC = flowMax(
           ease: 'power1.out',
         },
         'hairDone-=0.33',
+      )
+      .addLabel('faceDone')
+      .to(
+        flowerPetals,
+        {
+          duration: 0.5,
+          opacity: 1,
+          // scale: 1,
+          ease: 'power1.out',
+          stagger: 0.1,
+        },
+        '>-0.26',
+      )
+      .to(
+        eyebrow,
+        {
+          duration: 0.6,
+          opacity: 1,
+        },
+        'faceDone-=0.595',
+      )
+      .to(
+        flowerPetals,
+        {
+          duration: 0.5,
+          opacity: 1,
+          // scale: 1,
+          ease: 'power1.out',
+          stagger: 0.1,
+        },
+        'faceDone-=0.26',
+      )
+      .to(
+        cheekDot,
+        {
+          duration: 1.2,
+          opacity: 1,
+        },
+        '>-1.2',
       )
   }),
   ({scale}) => (

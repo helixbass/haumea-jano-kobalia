@@ -180,14 +180,6 @@ const App: FC = flowMax(
         drawSVG: '0%',
         ease: 'power1.inOut',
       })
-      .to(
-        greenBackground,
-        {
-          duration: 0.4,
-          opacity: 1,
-        },
-        '>-0.1',
-      )
       .set(girl, {
         opacity: 1,
       })
@@ -197,10 +189,22 @@ const App: FC = flowMax(
         opacity: 1,
         y: 400,
       })
-      .to(hair, {
-        duration: 1.0,
-        y: 0,
-      })
+      .to(
+        greenBackground,
+        {
+          duration: 0.4,
+          opacity: 1,
+        },
+        '>-0.1',
+      )
+      .to(
+        hair,
+        {
+          duration: 1.0,
+          y: 0,
+        },
+        '>-0.3',
+      )
       .to(
         hair,
         {
@@ -216,19 +220,19 @@ const App: FC = flowMax(
       .to(
         face,
         {
-          duration: 1.2,
+          duration: 0.8,
           opacity: 1,
         },
-        'hairDone-=0.3',
+        'hairDone-=0.33',
       )
       .to(
         face,
         {
-          duration: 0.8,
+          duration: 0.5,
           x: 0,
           ease: 'power1.out',
         },
-        'hairDone',
+        'hairDone-=0.33',
       )
   }),
   ({scale}) => (

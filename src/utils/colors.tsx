@@ -8,6 +8,7 @@ export const atOpacity = (opacity: number) => (color: Color): Color =>
     .toString()
 
 export default {
-  black: '#000000',
-  white: '#ffffff',
+  black: '#233047',
+  white: '#fffbf7',
+  orange: '#d57f77',
 }
